@@ -3,95 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador Huerto Hidropónico - Maker Club León</title>
+    <title>Simulador Pro - Maker Club León</title>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .dashboard { display: flex; gap: 30px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); max-width: 900px; width: 100%; flex-wrap: wrap; }
-        .controls { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px; }
-        .visualization { flex: 1; min-width: 300px; background: #e0f2f1; border-radius: 12px; padding: 40px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+        :root { --water-color: #2196f3; --tank-color: #0288d1; --tower-color: #81c784; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eceff1; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .dashboard { display: flex; gap: 20px; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 1000px; width: 100%; flex-wrap: wrap; }
+        .controls { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 15px; }
+        .visualization { flex: 1.2; min-width: 320px; background: #f0f4f8; border-radius: 12px; padding: 20px; position: relative; display: flex; flex-direction: column; align-items: center; min-height: 500px; overflow: hidden; border: 2px solid #cfd8dc; }
         
-        /* Controles */
-        .card { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
-        .slider-container { display: flex; flex-direction: column; margin-bottom: 15px; }
-        input[type="range"] { width: 100%; cursor: pointer; }
-        .value-display { font-weight: bold; color: #00796b; float: right; }
+        .card { background: #ffffff; padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h3 { margin-top: 0; color: #455a64; font-size: 1.1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; }
         
-        button { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; background-color: #e0e0e0; transition: all 0.2s; margin-top: 5px; width: 100%; }
-        button:hover { background-color: #d5d5d5; }
-        button.active { background-color: #4caf50; color: white; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
-        .toggle-btn { background-color: #2196f3; color: white; }
-        .toggle-btn:hover { background-color: #1976d2; }
+        .slider-container { margin-bottom: 10px; }
+        .value-display { font-weight: bold; color: #1976d2; float: right; }
+        
+        button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; width: 100%; margin-bottom: 5px; }
+        .btn-manual { background: #e0e0e0; color: #616161; }
+        .btn-manual.active { background: #4caf50; color: white; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(76,175,80,0.3); }
+        .btn-mode { background: #607d8b; color: white; margin-bottom: 15px; }
+        .btn-main-pump { background: #00bcd4; color: white; font-size: 1rem; }
+        .btn-main-pump.active { background: #ff5722; animation: pulse 1.5s infinite; }
 
-        /* Dibujo del sistema */
-        .tower { width: 80px; height: 250px; background: #81c784; border-radius: 10px 10px 0 0; border: 3px solid #388e3c; position: relative; z-index: 2; }
-        .tank { width: 180px; height: 100px; background: #4fc3f7; border-radius: 0 0 10px 10px; border: 3px solid #0288d1; border-top: none; position: relative; z-index: 1; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 10px; }
+        /* Gráficos del Sistema */
+        .tower { width: 100px; height: 320px; background: var(--tower-color); border: 4px solid #2e7d32; border-radius: 15px 15px 5px 5px; position: relative; z-index: 5; margin-top: 20px; }
+        .tank { width: 220px; height: 120px; background: #bbdefb; border: 4px solid var(--tank-color); border-radius: 5px 5px 20px 20px; position: relative; z-index: 4; display: flex; justify-content: center; align-items: center; margin-top: -5px; }
         
-        /* Motores y Bombas */
-        .motor { width: 45px; height: 45px; background: #9e9e9e; border-radius: 50%; position: absolute; border: 4px solid #616161; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: bold; color: white; text-align: center; transition: background 0.3s; }
-        .motor.running { background: #ffeb3b; color: #333; border-color: #fbc02d; animation: spin 1s linear infinite; }
+        /* Tubería y Agua */
+        .pipe { position: absolute; bottom: 60px; right: 20px; width: 12px; height: 340px; background: #cfd8dc; border: 2px solid #90a4ae; border-radius: 10px; z-index: 3; }
+        .water-column { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: var(--water-color); transition: height 2s ease-in-out; border-radius: 5px; box-shadow: 0 0 10px rgba(33,150,243,0.5); }
+        .water-top-exit { position: absolute; top: -10px; right: 10px; width: 50px; height: 8px; background: transparent; z-index: 6; }
+        .droplet { position: absolute; width: 6px; height: 10px; background: var(--water-color); border-radius: 50%; opacity: 0; }
+
+        /* Motores Peristálticos */
+        .peristaltic { width: 50px; height: 50px; background: #455a64; border-radius: 50%; position: absolute; border: 4px solid #263238; display: flex; justify-content: center; align-items: center; color: white; font-size: 9px; font-weight: bold; text-align: center; z-index: 10; }
+        .peristaltic.running { animation: rotate 0.5s linear infinite; border-color: #ffeb3b; box-shadow: 0 0 15px rgba(255,235,59,0.5); }
         
-        .main-pump { width: 60px; height: 40px; background: #757575; border-radius: 6px; border: 2px solid #424242; color: white; font-size: 10px; display: flex; justify-content: center; align-items: center; transition: background 0.3s; }
-        .main-pump.running { background: #4caf50; border-color: #1b5e20; }
-        .water-flow { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 10px; height: 0; background: rgba(33, 150, 243, 0.7); transition: height 0.3s; z-index: 3; }
-        .main-pump.running ~ .water-flow { height: 250px; animation: flowUp 1s infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        @keyframes drip { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(280px); opacity: 0; } }
 
-        /* Posiciones */
-        #mot-abonoA { top: 20px; left: 10px; }
-        #mot-abonoB { top: 80px; left: 10px; }
-        #mot-phUp { top: 20px; right: 10px; }
-        #mot-phDown { top: 80px; right: 10px; }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes flowUp { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        /* Posiciones Motores */
+        #m-abonoA { top: 60px; left: 30px; }
+        #m-abonoB { top: 130px; left: 30px; }
+        #m-phUp { top: 60px; right: 80px; }
+        #m-phDown { top: 130px; right: 80px; }
     </style>
 </head>
 <body>
 
-    <h2>Panel de Control - Huerto Hidropónico</h2>
+    <h2 style="color: #263238;">Control de Hidroponía Vertical</h2>
 
     <div class="dashboard">
         <div class="controls">
+            <button id="btn-mode" class="btn-mode" onclick="toggleMode()">MODO: MANUAL</button>
+
             <div class="card">
-                <h3>Modo de Operación</h3>
-                <button id="btn-mode" class="toggle-btn" onclick="toggleMode()">MODO: MANUAL</button>
+                <h3>Sensores</h3>
+                <div class="slider-container">
+                    <label>pH: <span id="ph-val" class="value-display">7.0</span></label>
+                    <input type="range" id="ph-slider" min="4" max="9" step="0.1" value="7.0" oninput="updateSensors()">
+                </div>
+                <div class="slider-container">
+                    <label>EC: <span id="ec-val" class="value-display">1200</span> µS/cm</label>
+                    <input type="range" id="ec-slider" min="200" max="2500" step="50" value="1200" oninput="updateSensors()">
+                </div>
             </div>
 
             <div class="card">
-                <h3>Sensores (Simulación)</h3>
-                <div class="slider-container">
-                    <label>Nivel de pH: <span id="ph-val" class="value-display">7.0</span></label>
-                    <input type="range" id="ph-slider" min="0" max="14" step="0.1" value="7.0" oninput="updateSensors()">
-                </div>
-                <div class="slider-container">
-                    <label>Conductividad (EC): <span id="ec-val" class="value-display">1000</span> µS/cm</label>
-                    <input type="range" id="ec-slider" min="0" max="3000" step="10" value="1000" oninput="updateSensors()">
+                <h3>Dosificación (Motores Nema17)</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <button id="btn-abonoA" class="btn-manual" onclick="togglePump('abonoA')">Abono A</button>
+                    <button id="btn-abonoB" class="btn-manual" onclick="togglePump('abonoB')">Abono B</button>
+                    <button id="btn-phUp" class="btn-manual" onclick="togglePump('phUp')">pH Up (+)</button>
+                    <button id="btn-phDown" class="btn-manual" onclick="togglePump('phDown')">pH Down (-)</button>
                 </div>
             </div>
 
-            <div class="card">
-                <h3>Actuadores (Control Manual)</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <button id="btn-abonoA" onclick="togglePump('abonoA')">Abono A</button>
-                    <button id="btn-abonoB" onclick="togglePump('abonoB')">Abono B</button>
-                    <button id="btn-phUp" onclick="togglePump('phUp')">pH Up</button>
-                    <button id="btn-phDown" onclick="togglePump('phDown')">pH Down</button>
-                </div>
-                <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
-                <button id="btn-main" onclick="toggleMainPump()">Bomba Principal (Relé)</button>
+            <div class="card" style="background: #e1f5fe;">
+                <h3>Bomba Principal (Relé 220V)</h3>
+                <button id="btn-main" class="btn-main-pump" onclick="toggleMainPump()">ENCENDER BOMBA SUMERGIBLE</button>
+                <p style="font-size: 0.8rem; color: #546e7a; margin-bottom: 0;">Simula la subida de agua al depósito superior.</p>
             </div>
         </div>
 
         <div class="visualization">
-            <div id="mot-abonoA" class="motor">Abo A</div>
-            <div id="mot-abonoB" class="motor">Abo B</div>
-            <div id="mot-phUp" class="motor">pH +</div>
-            <div id="mot-phDown" class="motor">pH -</div>
+            <div id="m-abonoA" class="peristaltic">ABO A</div>
+            <div id="m-abonoB" class="peristaltic">ABO B</div>
+            <div id="m-phUp" class="peristaltic">pH +</div>
+            <div id="m-phDown" class="peristaltic">pH -</div>
 
-            <div class="tower">
-                <div class="water-flow"></div>
+            <div class="tower" id="main-tower">
+                <div id="drip-container"></div>
+            </div>
+            <div class="pipe">
+                <div id="water-pipe" class="water-column"></div>
             </div>
             <div class="tank">
-                <div id="mot-main" class="main-pump">Bomba Sum.</div>
+                <div style="background: #455a64; color: white; padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: bold;">BOMBA ESP32</div>
             </div>
         </div>
     </div>
@@ -99,75 +107,82 @@
     <script>
         let isAuto = false;
         let pumps = { abonoA: false, abonoB: false, phUp: false, phDown: false };
-        let mainPump = false;
+        let mainPumpActive = false;
+        let dripInterval;
 
         function toggleMode() {
             isAuto = !isAuto;
             const btn = document.getElementById('btn-mode');
             btn.innerText = isAuto ? "MODO: AUTOMÁTICO" : "MODO: MANUAL";
-            btn.style.backgroundColor = isAuto ? "#9c27b0" : "#2196f3";
-            
-            // Deshabilitar botones manuales en modo automático
-            const buttons = document.querySelectorAll('.card:nth-child(3) button:not(#btn-main)');
-            buttons.forEach(b => b.disabled = isAuto);
-
+            btn.style.backgroundColor = isAuto ? "#673ab7" : "#607d8b";
+            document.querySelectorAll('.btn-manual').forEach(b => b.disabled = isAuto);
             if (isAuto) evaluateLogic();
         }
 
         function updateSensors() {
             const ph = parseFloat(document.getElementById('ph-slider').value).toFixed(1);
             const ec = document.getElementById('ec-slider').value;
-            
             document.getElementById('ph-val').innerText = ph;
             document.getElementById('ec-val').innerText = ec;
-
             if (isAuto) evaluateLogic();
         }
 
         function evaluateLogic() {
             const ph = parseFloat(document.getElementById('ph-slider').value);
             const ec = parseInt(document.getElementById('ec-slider').value);
-
-            // Lógica de automatización
             setPumpState('phDown', ph > 7.5);
             setPumpState('phUp', ph < 5.5);
-            
-            const lowNutrients = ec < 800;
-            setPumpState('abonoA', lowNutrients);
-            setPumpState('abonoB', lowNutrients);
+            setPumpState('abonoA', ec < 800);
+            setPumpState('abonoB', ec < 800);
         }
 
-        function togglePump(pumpId) {
-            if (isAuto) return; // Solo funciona en manual
-            setPumpState(pumpId, !pumps[pumpId]);
+        function togglePump(id) {
+            if (!isAuto) setPumpState(id, !pumps[id]);
         }
 
-        function setPumpState(pumpId, state) {
-            pumps[pumpId] = state;
-            const btn = document.getElementById(`btn-${pumpId}`);
-            const mot = document.getElementById(`mot-${pumpId}`);
-            
-            if (state) {
-                btn.classList.add('active');
-                mot.classList.add('running');
-            } else {
-                btn.classList.remove('active');
-                mot.classList.remove('running');
-            }
+        function setPumpState(id, state) {
+            pumps[id] = state;
+            const btn = document.getElementById(`btn-${id}`);
+            const mot = document.getElementById(`m-${id}`);
+            state ? btn.classList.add('active') : btn.classList.remove('active');
+            state ? mot.classList.add('running') : mot.classList.remove('running');
         }
 
         function toggleMainPump() {
-            mainPump = !mainPump;
+            mainPumpActive = !mainPumpActive;
             const btn = document.getElementById('btn-main');
-            const mot = document.getElementById('mot-main');
+            const water = document.getElementById('water-pipe');
             
-            if (mainPump) {
+            if (mainPumpActive) {
                 btn.classList.add('active');
-                mot.classList.add('running');
+                btn.innerText = "BOMBA FUNCIONANDO";
+                water.style.height = "100%";
+                // Iniciar goteo después de que el agua "suba"
+                setTimeout(() => { if(mainPumpActive) startDripping(); }, 1800);
             } else {
                 btn.classList.remove('active');
-                mot.classList.remove('running');
+                btn.innerText = "ENCENDER BOMBA SUMERGIBLE";
+                water.style.height = "0%";
+                stopDripping();
             }
+        }
+
+        function startDripping() {
+            if (dripInterval) return;
+            dripInterval = setInterval(() => {
+                const drip = document.createElement('div');
+                drip.className = 'droplet';
+                drip.style.left = Math.random() * 80 + 10 + 'px';
+                drip.style.top = '10px';
+                drip.style.animation = 'drip 1.5s linear forwards';
+                document.getElementById('main-tower').appendChild(drip);
+                setTimeout(() => drip.remove(), 1600);
+            }, 300);
+        }
+
+        function stopDripping() {
+            clearInterval(dripInterval);
+            dripInterval = null;
         }
     </script>
 </body>
